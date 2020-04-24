@@ -5,7 +5,7 @@
 
 #说明#
 添加噪声的代码源文件为：addNoise.py
-滤波器代码源文件为：addNoise.py
+滤波器代码源文件为：filters.py
 原始图像文件：lena.jpg
 作业报告：Project1_蔡翔.pdf与Project1_蔡翔.docx
 
