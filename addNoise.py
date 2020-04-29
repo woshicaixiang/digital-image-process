@@ -171,14 +171,14 @@ if __name__ == '__main__':
 			os.remove(cur_path + str('\\') + i)
 	else:
 		os.mkdir('gray_image')
-	if os.path.exists(r'./guassian_blur'):
+	if os.path.exists(r'./gaussian_blur'):
 		cur_path = os.getcwd()
-		cur_path = cur_path + '\\guassian_blur'
-		cur_file = os.listdir('guassian_blur')
+		cur_path = cur_path + '\\gaussian_blur'
+		cur_file = os.listdir('gaussian_blur')
 		for i in cur_file:
 			os.remove(cur_path + str('\\') + i)
 	else:
-		os.mkdir('guassian_blur')
+		os.mkdir('gaussian_blur')
 	if os.path.exists(r'./uGaussianSin_blur'):
 		cur_path = os.getcwd()
 		cur_path = cur_path + '\\uGaussianSin_blur'
@@ -213,45 +213,45 @@ if __name__ == '__main__':
 	cv.imshow('img_gray1g', img_gray1g)
 	plt.figure(4)
 	noise_grayHist1g = plt.hist(noise_gray1g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_grayHist1g.png')
+	plt.savefig(r'./gaussian_blur/noise_grayHist1g.png')
 	cv.imshow('img_gray2g', img_gray2g)
 	plt.figure(5)
 	noise_grayHist2g = plt.hist(noise_gray2g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_grayHist2g.png')
+	plt.savefig(r'./gaussian_blur/noise_grayHist2g.png')
 	cv.imshow('img_gray3g', img_gray3g)
 	plt.figure(6)
 	noise_grayHist3g = plt.hist(noise_gray3g.ravel(), 256)
-	plt.savefig(r'./guassian_blur/noise_grayHist3g.png')
+	plt.savefig(r'./gaussian_blur/noise_grayHist3g.png')
 	cv.imshow('img_gray4g', img_gray4g)
 	plt.figure(7)
 	noise_grayHist4g = plt.hist(noise_gray4g.ravel(), 256)
-	plt.savefig(r'./guassian_blur/noise_grayHist4g.png')
+	plt.savefig(r'./gaussian_blur/noise_grayHist4g.png')
 	cv.imshow('img_gray5g', img_gray5g)
 	plt.figure(8)
 	noise_grayHist5g = plt.hist(noise_gray5g.ravel(), 256)
-	plt.savefig(r'./guassian_blur/noise_grayHist5g.png')
+	plt.savefig(r'./gaussian_blur/noise_grayHist5g.png')
 
 
 	cv.imshow('img_color1g', img_color1g)
 	plt.figure(9)
 	noise_colorHist1g = plt.hist(noise_color1g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_colorHist1g.png')
+	plt.savefig(r'./gaussian_blur/noise_colorHist1g.png')
 	cv.imshow('img_color2g', img_color2g)
 	plt.figure(10)
 	noise_colorHist2g = plt.hist(noise_color2g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_colorHist2g.png')
+	plt.savefig(r'./gaussian_blur/noise_colorHist2g.png')
 	cv.imshow('img_color3g', img_color3g)
 	plt.figure(11)
 	noise_colorHist3g = plt.hist(noise_color3g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_colorHist3g.png')
+	plt.savefig(r'./gaussian_blur/noise_colorHist3g.png')
 	cv.imshow('img_color4g', img_color4g)
 	plt.figure(12)
 	noise_colorHist4g = plt.hist(noise_color4g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_colorHist4g.png')
+	plt.savefig(r'./gaussian_blur/noise_colorHist4g.png')
 	cv.imshow('img_color5g', img_color5g)
 	plt.figure(13)
 	noise_colorHist5g = plt.hist(noise_color5g.ravel(),256)
-	plt.savefig(r'./guassian_blur/noise_colorHist5g.png')
+	plt.savefig(r'./gaussian_blur/noise_colorHist5g.png')
 
 
 	# uGaussianSin_blur()函数进行模糊的图像及其直方图
@@ -382,8 +382,8 @@ if __name__ == '__main__':
 
 	# guassian_blur()函数进行模糊的图像及其直方图
 	for i in range(5):
-		cv.imwrite(r'./guassian_blur/img_gray' + str(i) + 'g.png', a11[i])
-		cv.imwrite(r'./guassian_blur/img_color' + str(i) + 'g.png', a12[i])
+		cv.imwrite(r'./gaussian_blur/img_gray' + str(i) + 'g.png', a11[i])
+		cv.imwrite(r'./gaussian_blur/img_color' + str(i) + 'g.png', a12[i])
 
 	# uGaussianSin_blur()函数进行模糊的图像及其直方图
 	for i in range(5):
