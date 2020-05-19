@@ -19,7 +19,7 @@ def gaussianFilter(image, size=3, sigma=1.5, gray=True):
 	imageNew = image.copy()
 	height, width = image.shape[0], image.shape[1]
 	exband = np.uint((size - 1) / 2)
-	imageExband = cv.copyMakeBorder(image, exband, exband, exband, exband, cv.BORDER_CONSTANT, value=0)
+	imageExband = cv.copyMakeBorder(image, exband, exband, exband, exband, cv.BORDER_REPLICATE)
 	gCore = getGaussianCore(size, sigma)
 	for i in range(height):
 		for j in range(width):
@@ -77,9 +77,9 @@ def nmsMethod(image):
 			min_index = np.argmin(diff)
 			condition = np.array([
 								 gra[i + 1, j + 1] >=  gra[i + 1, j] and gra[i + 1, j + 1] >= gra[i + 1, j + 2],
-								 gra[i + 1, j + 1] >= gra[i + 2, j] and gra[i + 1, j + 1] >= gra[i, j + 2],
+								 gra[i + 1, j + 1] >= gra[i, j] and gra[i + 1, j + 1] >= gra[i + 2, j + 2],
 								 gra[i + 1, j + 1] >= gra[i, j + 1] and gra[i + 1, j + 1] >= gra[i + 2, j + 1],
-								 gra[i + 1, j + 1] >= gra[i, j] and gra[i + 1, j + 1] >= gra[i + 2, j + 2]
+								 gra[i + 1, j + 1] >= gra[i + 2, j] and gra[i + 1, j + 1] >= gra[i, j + 2]
 								 ])
 			if min_index == 2 or min_index == 4:
 				if condition[2]:
@@ -124,6 +124,7 @@ def exJudge(windows, TH):
 def thresholdProcess(image, TH, TL):
 	imageNew = image.copy()
 	height, width = image.shape[0], image.shape[1]
+	# imageExband = cv.copyMakeBorder(image, 1, 1, 1, 1, cv.BORDER_REPLICATE)
 	imageExband = cv.copyMakeBorder(image, 1, 1, 1, 1, cv.BORDER_CONSTANT,value=0)
 	for i in range(height):
 		for j in range(width):
@@ -163,9 +164,9 @@ def cannyMethod(image, TH, TL, gray=True):
 if __name__ == '__main__':
 	image = cv.imread(r'./lena.jpg')
 	# image = cv.resize(image, (int(image.shape[1] / 3), int(image.shape[0] / 3)),interpolation=cv.INTER_CUBIC)
-	canny1 = cannyMethod(image, 0.2*np.max(image), 0.08*np.max(image), False)
+	canny1 = cannyMethod(image, 0.2*np.max(image), 0.1*np.max(image), False)
 	canny2 = cv.Canny(image, 0.2*np.max(image), 0.6*np.max(image))
-	img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+	# img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 	cv.imshow('origin', image)
 	cv.imshow('canny1', canny1)
 	cv.imshow('canny2', canny2)
