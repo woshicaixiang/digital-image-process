@@ -138,6 +138,26 @@ class mainFrame(wx.Frame):
 			self.Onfunc_3(self)
 		print(" ")
 
+	def cr_otsu(self):
+		"""
+		肤色检测
+		YCrCb颜色空间的Cr分量+Otsu阈值分割
+        :param image: 图片路径
+        :return: None
+        """
+		ycrcb = cv.cvtColor(self.image, cv.COLOR_BGR2YCR_CB)
+		(y, cr, cb) = cv.split(ycrcb)
+		cr1 = cv.GaussianBlur(cr, (5, 5), 0)
+		_, self.skin = cv.threshold(cr1, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+		kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+		# 闭操作
+		self.skin = cv.morphologyEx(self.skin, cv.MORPH_CLOSE, kernel, iterations=5)
+		# 膨胀
+		self.skin = cv.dilate(self.skin, kernel, 5)
+		# 开操作
+		# self.skin = cv.morphologyEx(skin, cv.MORPH_OPEN, kernel, iterations=5)
+		# dst = cv.bitwise_and(self.image, self.image, mask=self.skin)
+
 	def Onfunc_1(self, event):
 		"""
 		半色调技术--方法一
@@ -157,21 +177,23 @@ class mainFrame(wx.Frame):
 
 	def Onfunc_3(self, event):
 		"""
-		肤色调整
+		肤色调整,用了肤色检测
 		:param event:
 		:return:
 		"""
 		if self.now_process != 0:
 			self.now_process = 3
-			image = cv.imread(self.filePath)
-			img_0 = image.copy()
+			self.image = cv.imread(self.filePath)
+			img_0 = self.image.copy()
+			self.cr_otsu()
 			img_0 = np.array(img_0) / 255
-			# print(img_0)
+			# print(self.skin)
 			series = img_0.copy()
-			height, width = image.shape[0], image.shape[1]
+			height, width = self.image.shape[0], self.image.shape[1]
 			for i in range(height):
 				for j in range(width):
-					series[i][j] = np.log(np.multiply(img_0[i][j], (self.ratio - 1)) + 1) / np.log(self.ratio)####
+					if self.skin[i, j] == 255:
+						series[i][j] = np.log(np.multiply(img_0[i][j], (self.ratio - 1)) + 1) / np.log(self.ratio)
 			img_0 = np.multiply(255, series)
 			img_0 = np.rint(img_0)
 			img_0 = np.array(img_0, dtype=np.uint8)
@@ -188,6 +210,40 @@ class mainFrame(wx.Frame):
 			mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
 			mes1.ShowModal()
 			mes1.Destroy()
+
+	# def Onfunc_3(self, event):
+	# 	"""
+	# 	肤色调整，没有用肤色检测
+	# 	:param event:
+	# 	:return:
+	# 	"""
+	# 	if self.now_process != 0:
+	# 		self.now_process = 3
+	# 		image = cv.imread(self.filePath)
+	# 		img_0 = image.copy()
+	# 		img_0 = np.array(img_0) / 255
+	# 		# print(img_0)
+	# 		series = img_0.copy()
+	# 		height, width = image.shape[0], image.shape[1]
+	# 		for i in range(height):
+	# 			for j in range(width):
+	# 				series[i][j] = np.log(np.multiply(img_0[i][j], (self.ratio - 1)) + 1) / np.log(self.ratio)####
+	# 		img_0 = np.multiply(255, series)
+	# 		img_0 = np.rint(img_0)
+	# 		img_0 = np.array(img_0, dtype=np.uint8)
+	# 		self.image = img_0
+	# 		cv.imwrite(r'.\new_0.png', img_0)
+	#
+	# 		img_1 = wx.Image(r'.\new_0.png', wx.BITMAP_TYPE_ANY)
+	# 		img_1.Rescale(300, 300)
+	# 		bitpic_1 = img_1.ConvertToBitmap()
+	# 		wx.StaticBitmap(self.panel, -1, bitmap=bitpic_1, pos=(600, 100))
+	# 		os.remove(r'.\new_0.png')
+	# 		print(" ")
+	# 	else:
+	# 		mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
+	# 		mes1.ShowModal()
+	# 		mes1.Destroy()
 
 	def Onfunc_4(self, event):
 		"""
