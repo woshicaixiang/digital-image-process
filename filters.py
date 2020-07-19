@@ -185,7 +185,9 @@ if __name__ == '__main__':
 	# 读取原始图像
 	img = cv.imread(r'./lena.jpg')
 	img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-
+	plt.figure(0)
+	histOutput1 = plt.hist(img.ravel(), 256)
+	plt.savefig(r'./pro2/histImg.png')
 	# 添加高斯噪声和椒盐噪声
 	img1, noise1 = add.gaussian_blur(img_gray, 0, 30)
 	img2, noise2 = add.gaussian_blur(img, 0, 30, False)
@@ -266,8 +268,6 @@ if __name__ == '__main__':
 	cv.imwrite(r'./pro2/output7.png',output7)
 	cv.imshow('8', output8)
 	cv.imwrite(r'./pro2/output8.png',output8)
-
-
 
 
 	cv.waitKey()
