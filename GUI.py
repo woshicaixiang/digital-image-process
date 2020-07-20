@@ -121,9 +121,11 @@ class MainFrame(wx.Frame):
     def Onhelp(self, event):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
         dlg2 = wx.MessageDialog(self, "该软件主要功能及相关说明如下所述：\n"
-                                      "磨皮：\n"
-                                      "美白：\n"
-                                      "浮雕效果：\n"
+                                      "首先需要打开一张图片或者拍摄一张图片，再进行以下操作："
+                                      "磨皮、美白、浮雕效果。\n"
+                                      "备注：\n"
+                                      "其中美白和磨皮处理可以在互相处理的基础上再处理，且二者都可以用滑块控制美白以及磨皮的程度，\n"
+                                      "而浮雕效果则是独立开来处理原始图像。\n"
                                 , "帮助", wx.OK)
         dlg2.ShowModal()  # Show it
         dlg2.Destroy()  # finally destroy it when finished.
