@@ -33,6 +33,7 @@ class MainFrame(wx.Frame):
         self.image_i = 1
         self.imgFlag = 0
         self.sliderFlag = False
+        self.img1_isEmpty = True
         self.panel = wx.Panel(self)
 
         # 指定新字体的静态文本
@@ -66,7 +67,7 @@ class MainFrame(wx.Frame):
         white_item1 = white_menu.Append(wx.ID_ANY, "美白（含肤色检测）", "美白（含肤色检测）")
         white_menu.AppendSeparator()
         # 将美白子菜单添加到开始菜单中
-        filemenu.AppendSubMenu(white_menu, "美白", "八向浮雕 | 调和浮雕")
+        filemenu.AppendSubMenu(white_menu, "美白", "无肤色检验 | 含肤色检验")
         filemenu.AppendSeparator()
         # 创建浮雕子菜单的两个菜单项
         emboss_menu = wx.Menu()
@@ -74,8 +75,10 @@ class MainFrame(wx.Frame):
         emboss_menu.AppendSeparator()
         emboss_item1 = emboss_menu.Append(wx.ID_ANY, "调和浮雕", "调和浮雕")
         emboss_menu.AppendSeparator()
+        emboss_item2 = emboss_menu.Append(wx.ID_ANY, "雕刻", "雕刻操作")
+        emboss_menu.AppendSeparator()
         # 将浮雕子菜单添加到开始菜单中
-        filemenu.AppendSubMenu(emboss_menu, "浮雕效果", "八向浮雕 | 调和浮雕")
+        filemenu.AppendSubMenu(emboss_menu, "浮雕效果", "八向浮雕 | 调和浮雕 | 雕刻")
         filemenu.AppendSeparator()
         exit = filemenu.Append(wx.ID_EXIT, "退出", " 退出程序")
         self.Bind(wx.EVT_MENU, self.Onfunc_1, func_1)
@@ -86,6 +89,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.Onfunc_5, func_5)
         self.Bind(wx.EVT_MENU, self.emboss_func0, emboss_item0)
         self.Bind(wx.EVT_MENU, self.emboss_func1, emboss_item1)
+        self.Bind(wx.EVT_MENU, self.emboss_func2, emboss_item2)
         self.Bind(wx.EVT_MENU, self.OnExit, exit)
 
         # 创建菜单栏
@@ -121,11 +125,13 @@ class MainFrame(wx.Frame):
     def Onhelp(self, event):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
         dlg2 = wx.MessageDialog(self, "该软件主要功能及相关说明如下所述：\n"
-                                      "首先需要打开一张图片或者拍摄一张图片，再进行以下操作："
+                                      "首先需要打开或者拍摄一张图片，再进行以下操作："
                                       "磨皮、美白、浮雕效果。\n"
                                       "备注：\n"
-                                      "其中美白和磨皮处理可以在互相处理的基础上再处理，且二者都可以用滑块控制美白以及磨皮的程度，\n"
+                                      "（1）其中美白和磨皮处理可以在互相处理的基础上再处理，且二者都可以用滑块控制美白以及磨皮的程度，\n"
                                       "而浮雕效果则是独立开来处理原始图像。\n"
+                                      "（2）拍摄操作：调出摄像头后，按下空格键进行拍摄。\n"
+                                      "（3）部分功能响应时间较长，请耐心等待。"
                                 , "帮助", wx.OK)
         dlg2.ShowModal()  # Show it
         dlg2.Destroy()  # finally destroy it when finished.
@@ -161,7 +167,9 @@ class MainFrame(wx.Frame):
         if self.sliderFlag:
             self.slider.Destroy()
             self.sliderFlag = False
+
         img_camera = camera()
+
         if img_camera is not None:
             dlg = wx.FileDialog(self, '另存为', os.getcwd(),
                                 defaultFile='',
@@ -171,13 +179,12 @@ class MainFrame(wx.Frame):
             if dlg.ShowModal() == wx.ID_OK:
                 self.imgFlag = 1
                 self.filePath = dlg.GetPath()
-                print(self.filePath)
                 cv.imwrite(self.filePath, img_camera)
                 save_message = wx.MessageDialog(self, '图像已保存', '提示')
                 save_message.ShowModal()
                 save_message.Destroy()
                 dlg.Destroy()
-                self.image = img_camera
+                self.image0 = img_camera
                 # cv.imwrite(self.filePath, img_camera)
                 image = wx.Image(self.filePath, wx.BITMAP_TYPE_ANY)
                 image.Rescale(300, 300)
@@ -189,15 +196,17 @@ class MainFrame(wx.Frame):
         if self.sliderFlag:
             self.slider.Destroy()
             self.sliderFlag = False
+
         dlg = wx.FileDialog(self, message='打开文件',
                             defaultDir='',
                             defaultFile='',
                             wildcard=self.wildcard,
                             style=wx.FD_OPEN)
+
         if dlg.ShowModal() == wx.ID_OK:
             self.imgFlag = 2
             self.filePath = dlg.GetPath()
-            self.image = cv.imread(self.filePath)
+            self.image0 = cv.imread(self.filePath)
             image = wx.Image(self.filePath, wx.BITMAP_TYPE_ANY)
             image.Rescale(300, 300)
             bitpic = image.ConvertToBitmap()
@@ -210,21 +219,26 @@ class MainFrame(wx.Frame):
         if self.sliderFlag:
             self.slider.Destroy()
             self.sliderFlag = False
+
         if self.imgFlag != 0:
-            self.imgFlag = 3
-            dlg = wx.FileDialog(self, '另存为', os.getcwd(),
-                                defaultFile='',
-                                style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-                                wildcard=self.wildcard
-                                )
-            if dlg.ShowModal() == wx.ID_OK:
-                file_p = dlg.GetPath()
-                print(file_p)
-                cv.imwrite(file_p, self.image)
-                save_message = wx.MessageDialog(self, '图像已保存', '提示')
-                save_message.ShowModal()
-                save_message.Destroy()
-                dlg.Destroy()
+            if self.img1_isEmpty:
+                error_msg = wx.MessageDialog(self, '图像未经修改，无需保存', '提示')
+                error_msg.ShowModal()
+                error_msg.Destroy()
+            else:
+                self.imgFlag = 3
+                dlg = wx.FileDialog(self, '另存为', os.getcwd(),
+                                    defaultFile='',
+                                    style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+                                    wildcard=self.wildcard
+                                    )
+                if dlg.ShowModal() == wx.ID_OK:
+                    file_p = dlg.GetPath()
+                    cv.imwrite(file_p, self.image1)
+                    save_message = wx.MessageDialog(self, '图像已保存', '提示')
+                    save_message.ShowModal()
+                    save_message.Destroy()
+                    dlg.Destroy()
         else:
             mes2 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes2.ShowModal()
@@ -232,17 +246,22 @@ class MainFrame(wx.Frame):
 
     def Onfunc_4_1(self, event):
         """美白，未使用肤色检验"""
+        if self.sliderFlag:
+            self.slider.Destroy()
+            self.sliderFlag = False
+
         if self.imgFlag != 0:
             if self.imgFlag == 6:
                 pass
             else:
-                self.image = cv.imread(self.filePath)
+                self.image1 = cv.imread(self.filePath)
 
             self.slider = wx.Slider(self.panel, value=2, minValue=2, maxValue=10, pos=(400, 450), size=(200, 50),
                                     style=wx.SL_HORIZONTAL | wx.SL_LABELS)
             self.slider.Bind(wx.EVT_SLIDER, self.OnSliderScroll)
             self.sliderFlag = True
             self.white_1()
+            self.img1_isEmpty = False
         else:
             mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes1.ShowModal()
@@ -250,17 +269,22 @@ class MainFrame(wx.Frame):
 
     def Onfunc_4_2(self, event):
         """美白，使用了肤色检验"""
+        if self.sliderFlag:
+            self.slider.Destroy()
+            self.sliderFlag = False
+
         if self.imgFlag != 0:
             if self.imgFlag == 6:
                 pass
             else:
-                self.image = cv.imread(self.filePath)
+                self.image1 = cv.imread(self.filePath)
 
             self.slider = wx.Slider(self.panel, value=2, minValue=2, maxValue=10, pos=(400, 450), size=(200, 50),
                                     style=wx.SL_HORIZONTAL | wx.SL_LABELS)
             self.slider.Bind(wx.EVT_SLIDER, self.OnSliderScroll)
             self.sliderFlag = True
             self.white_2()
+            self.img1_isEmpty = False
         else:
             mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes1.ShowModal()
@@ -268,18 +292,22 @@ class MainFrame(wx.Frame):
 
     def Onfunc_5(self, event):
         """磨皮"""
+        if self.sliderFlag:
+            self.slider.Destroy()
+            self.sliderFlag = False
+
         if self.imgFlag != 0:
             if self.imgFlag == 4 or self.imgFlag == 5:
                 pass
             else:
-                self.image = cv.imread(self.filePath)
+                self.image1 = cv.imread(self.filePath)
             self.slider = wx.Slider(self.panel, value=2, minValue=2, maxValue=10, pos=(400, 450), size=(200, 50),
                                     style=wx.SL_HORIZONTAL | wx.SL_LABELS)
             self.slider.Bind(wx.EVT_SLIDER, self.OnSliderScroll)
             self.sliderFlag = True
             self.imgFlag = 6
             self.skin_process()
-
+            self.img1_isEmpty = False
         else:
             mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes1.ShowModal()
@@ -290,10 +318,13 @@ class MainFrame(wx.Frame):
         if self.sliderFlag:
             self.slider.Destroy()
             self.sliderFlag = False
+
         if self.imgFlag != 0:
             self.imgFlag = 7
-            self.image = cv.imread(self.filePath)
-            new_img = emboss(self.image, emboss_type=0)
+            self.image1 = cv.imread(self.filePath)
+            img0 = self.image1.copy()
+            new_img = emboss(self.image1, emboss_type=0)
+            self.image1 = new_img
             cv.imwrite(r'.\temp.png', new_img)
 
             img_1 = wx.Image(r'.\temp.png', wx.BITMAP_TYPE_ANY)
@@ -301,6 +332,7 @@ class MainFrame(wx.Frame):
             bitpic_1 = img_1.ConvertToBitmap()
             wx.StaticBitmap(self.panel, -1, bitmap=bitpic_1, pos=(600, 100))
             os.remove(r'.\temp.png')
+            self.img1_isEmpty = False
         else:
             mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes1.ShowModal()
@@ -311,10 +343,13 @@ class MainFrame(wx.Frame):
         if self.sliderFlag:
             self.slider.Destroy()
             self.sliderFlag = False
+
         if self.imgFlag != 0:
             self.imgFlag = 8
-            self.image = cv.imread(self.filePath)
-            new_img = emboss(self.image, emboss_type=1)
+            self.image1 = cv.imread(self.filePath)
+            img0 = self.image1.copy()
+            new_img = emboss(img0, emboss_type=1)
+            self.image1 = new_img
             cv.imwrite(r'.\temp.png', new_img)
 
             img_1 = wx.Image(r'.\temp.png', wx.BITMAP_TYPE_ANY)
@@ -322,17 +357,39 @@ class MainFrame(wx.Frame):
             bitpic_1 = img_1.ConvertToBitmap()
             wx.StaticBitmap(self.panel, -1, bitmap=bitpic_1, pos=(600, 100))
             os.remove(r'.\temp.png')
+            self.img1_isEmpty = False
+        else:
+            mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
+            mes1.ShowModal()
+            mes1.Destroy()
+
+    def emboss_func2(self, event):
+        """雕刻效果"""
+        if self.sliderFlag:
+            self.slider.Destroy()
+            self.sliderFlag = False
+
+        if self.imgFlag != 0:
+            self.imgFlag = 9
+            self.image1 = cv.imread(self.filePath)
+            img0 = self.image1.copy()
+            new_img = emboss(img0, emboss_type=2)
+            self.image1 = new_img
+            cv.imwrite(r'.\temp.png', new_img)
+
+            img_1 = wx.Image(r'.\temp.png', wx.BITMAP_TYPE_ANY)
+            img_1.Rescale(300, 300)
+            bitpic_1 = img_1.ConvertToBitmap()
+            wx.StaticBitmap(self.panel, -1, bitmap=bitpic_1, pos=(600, 100))
+            os.remove(r'.\temp.png')
+            self.img1_isEmpty = False
         else:
             mes1 = wx.MessageDialog(self, '未打开图像，请先打开图像！', '提示')
             mes1.ShowModal()
             mes1.Destroy()
 
     def OnSliderScroll(self, event):
-        """
-        滑块触发
-        :param event:
-        :return:
-        """
+        """滑块触发"""
         self.ratio = self.slider.GetValue()
         if self.imgFlag == 4:
             self.white_1()
@@ -342,11 +399,8 @@ class MainFrame(wx.Frame):
             self.skin_process()
 
     def cr_otsu(self):
-        """
-		肤色检测
-		YCrCb颜色空间的Cr分量+Otsu阈值分割
-		"""
-        ycrcb = cv.cvtColor(self.image, cv.COLOR_BGR2YCR_CB)
+        """肤色检测 YCrCb颜色空间的Cr分量+Otsu阈值分割"""
+        ycrcb = cv.cvtColor(self.image1, cv.COLOR_BGR2YCR_CB)
         (y, cr, cb) = cv.split(ycrcb)
         cr1 = cv.GaussianBlur(cr, (5, 5), 0)
         _, self.skin = cv.threshold(cr1, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
@@ -357,26 +411,23 @@ class MainFrame(wx.Frame):
         self.skin = cv.dilate(self.skin, kernel, 5)
 
     def white_1(self):
-        """
-		美白，没有用肤色检测
-		"""
+        """美白，没有用肤色检测"""
         if self.imgFlag == 6:
             pass
         else:
-            self.image = cv.imread(self.filePath)
+            self.image1 = cv.imread(self.filePath)
         self.imgFlag = 4
-        img_0 = self.image.copy()
+        img_0 = self.image1.copy()
         img_0 = np.array(img_0) / 255
-        # print(img_0)
         series = img_0.copy()
-        height, width = self.image.shape[0], self.image.shape[1]
+        height, width = self.image1.shape[0], self.image1.shape[1]
         for i in range(height):
             for j in range(width):
                 series[i][j] = np.log(np.multiply(img_0[i][j], (self.ratio - 1)) + 1) / np.log(self.ratio)
         img_0 = np.multiply(255, series)
         img_0 = np.rint(img_0)
         img_0 = np.array(img_0, dtype=np.uint8)
-        self.image = img_0
+        self.image1 = img_0
         cv.imwrite(r'.\new_0.png', img_0)
 
         img_1 = wx.Image(r'.\new_0.png', wx.BITMAP_TYPE_ANY)
@@ -386,20 +437,17 @@ class MainFrame(wx.Frame):
         os.remove(r'.\new_0.png')
 
     def white_2(self):
-        """
-        美白，使用了肤色检测
-        """
+        """美白，使用了肤色检测"""
         if self.imgFlag == 6:
             pass
         else:
-            self.image = cv.imread(self.filePath)
+            self.image1 = cv.imread(self.filePath)
         self.imgFlag = 5
-        img_0 = self.image.copy()
+        img_0 = self.image1.copy()
         self.cr_otsu()
         img_0 = np.array(img_0) / 255
-        # print(self.skin)
         series = img_0.copy()
-        height, width = self.image.shape[0], self.image.shape[1]
+        height, width = self.image1.shape[0], self.image1.shape[1]
         for i in range(height):
             for j in range(width):
                 if self.skin[i, j] == 255:
@@ -407,7 +455,7 @@ class MainFrame(wx.Frame):
         img_0 = np.multiply(255, series)
         img_0 = np.rint(img_0)
         img_0 = np.array(img_0, dtype=np.uint8)
-        self.image = img_0
+        self.image1 = img_0
         cv.imwrite(r'.\new_0.png', img_0)
         img_1 = wx.Image(r'.\new_0.png', wx.BITMAP_TYPE_ANY)
         img_1.Rescale(300, 300)
@@ -416,25 +464,23 @@ class MainFrame(wx.Frame):
         os.remove(r'.\new_0.png')
 
     def skin_process(self):
-        """
-        磨皮
-        :return:
-        """
+        """磨皮"""
         if self.imgFlag == 4 or self.imgFlag == 5:
             pass
         else:
-            self.image = cv.imread(self.filePath)
+            self.image1 = cv.imread(self.filePath)
         self.imgFlag = 6
-        img_0 = self.image
+        img_0 = self.image1.copy()
         img_0 = self.rgb_surface_blur(img_0, 20, self.ratio * 2)
         img_0 = np.array(img_0, dtype=np.uint8)
-        self.image = img_0
+        self.image1 = img_0
         cv.imwrite(r'.\new_0.png', img_0)
         img_1 = wx.Image(r'.\new_0.png', wx.BITMAP_TYPE_ANY)
         img_1.Rescale(300, 300)
         bitpic_1 = img_1.ConvertToBitmap()
         wx.StaticBitmap(self.panel, -1, bitmap=bitpic_1, pos=(600, 100))
         os.remove(r'.\new_0.png')
+
 
 if __name__ == "__main__":
     app = wx.App(False)

@@ -13,9 +13,9 @@ import cv2
 
 def emboss(image, emboss_type=0):
     """
-    浮雕效果函数，可自选使用八向浮雕和调和浮雕，默认八向浮雕
+    浮雕效果函数，可自选使用八向浮雕、调和浮雕和雕刻，默认八向浮雕
     :param image: 原始图像
-    :param emboss_type: 浮雕类型，0表示八向浮雕，1为调和浮雕
+    :param emboss_type: 浮雕类型，0表示八向浮雕，1为调和浮雕，2为雕刻
     :return: 浮雕化后的图像
     """
     img_height, img_width, _ = image.shape
@@ -46,6 +46,18 @@ def emboss(image, emboss_type=0):
                 p3 = int(gray_border[i + 1, j + 1])
                 p4 = int(gray_border[i - 1, j + 1])
                 new_pixel = p0 * 4 - p1 - p2 - p3 - p4 + 128
+                if new_pixel > 255:
+                    new_pixel = 255
+                elif new_pixel < 0:
+                    new_pixel = 0
+                emboss_img[i - 1, j - 1] = new_pixel
+    # 雕刻操作
+    elif emboss_type == 2:
+        for i in range(1, img_height + 1):
+            for j in range(1, img_width + 1):
+                p0 = gray_border[i - 1, j - 1]
+                p1 = gray_border[i + 1, j + 1]
+                new_pixel = int(p1) - int(p0) + 128
                 if new_pixel > 255:
                     new_pixel = 255
                 elif new_pixel < 0:

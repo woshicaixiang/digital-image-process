@@ -22,7 +22,7 @@ def camera():
         # 捕获每一帧图像
         ret, frame = cap.read()
         cv2.imshow('Camera', frame)
-        # 获得键盘返回值
+        # 获得键盘返回值，为了防止操作系统位数不同程序出现异常，与0xFF进行与运算
         key_value = cv2.waitKey(1) & 0xFF
         # 按下esc键，退出摄像头
         if key_value == 27:
